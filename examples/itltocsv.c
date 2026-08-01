@@ -3,11 +3,13 @@
  * @brief Export recognized track metadata from an iTunes Library to CSV.
  */
 #include <errno.h>
+#include <fcntl.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <itlp.h>
 
@@ -111,6 +113,25 @@ static int write_track(FILE *output, const struct mith *track) {
                  (unsigned int)track->unchecked) < 0 ? -1 : 0;
 }
 
+static FILE *open_new_output(const char *path) {
+  FILE *output;
+  int output_fd;
+
+  output_fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0666);
+  if (output_fd < 0)
+    return NULL;
+
+  output = fdopen(output_fd, "wb");
+  if (!output) {
+    int saved_errno = errno;
+    close(output_fd);
+    unlink(path);
+    errno = saved_errno;
+  }
+
+  return output;
+}
+
 int main(int argc, char *argv[]) {
   struct stat output_stat;
   struct msdh **blocks;
@@ -148,7 +169,7 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  output = fopen(argv[2], "wb");
+  output = open_new_output(argv[2]);
   if (!output) {
     fprintf(stderr, "Cannot create output %s: %s\n", argv[2], strerror(errno));
     itlp_free(blocks);

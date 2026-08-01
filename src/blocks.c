@@ -80,6 +80,24 @@ static bool child_count_fits(uint32_t count, size_t minimum_size,
   return true;
 }
 
+static bool mhoh_is_text(uint32_t type) {
+  switch (type) {
+  case TRACK_TITLE:
+  case ALBUM_TITLE:
+  case ARTIST:
+  case GENRE:
+  case KIND:
+  case COMMENTS:
+  case LOCAL_PATH:
+  case COMPOSER:
+  case PLAYLIST_NAME:
+  case LIBRARY_NAME:
+    return true;
+  default:
+    return false;
+  }
+}
+
 struct msdh* itlp_parse_msdh(char **msdh_string, const char *buffer_end) {
   struct msdh *msdh_block;
   char *record_start;
@@ -142,18 +160,9 @@ struct msdh* itlp_parse_msdh(char **msdh_string, const char *buffer_end) {
     msdh_block->subblock = (void*)itlp_parse_file(msdh_string, record_end);
     break;
   case BLOCK_XML:
-    /* Newer libraries can contain an auxiliary XML record that is not needed
-     * for track recovery. Its outer msdh length lets us skip it safely. */
-    fprintf(stderr,
-            "iTunes parser: Skipping unsupported msdh block type 0x%08x.\n",
-            msdh_block->type);
-    *msdh_string = record_start + record_length;
-    return msdh_block;
   default:
-    fprintf(stderr, "iTunes parser: Unsupported msdh block type 0x%08x.\n",
-            msdh_block->type);
-    free(msdh_block);
-    return NULL;
+    *msdh_string = (char *)record_end;
+    return msdh_block;
   }
 
   if (!msdh_block->subblock) {
@@ -260,14 +269,11 @@ struct mhoh* itlp_parse_mhoh(char **mhoh_string, const char *buffer_end) {
   /* Reading mhoh's type and value size */
   block->type = read_uint32t_offset(*mhoh_string,12);
   
-  /* Text mhoh records have 16 bytes of value metadata after their 24-byte
-   * header: the value length is at offset 28 and the text begins at 40.
-   * Flat binary records, notably type 0x24, begin at the declared header end;
-   * their bytes at offset 28 are data rather than a value length. */
+  /* Known text records store their value at offset 40; other types stay flat. */
   nested_value_size = record_length >= 32
     ? read_uint32t_offset(record_start, 28)
     : 0;
-  if (block->type != 0x24 && record_length >= 40 &&
+  if (mhoh_is_text(block->type) && record_length >= 40 &&
       nested_value_size == record_length - 40) {
     mhoh_value_size = nested_value_size;
     *mhoh_string = record_start + 40;

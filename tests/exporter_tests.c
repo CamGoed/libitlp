@@ -100,9 +100,26 @@ static void test_existing_output_is_not_replaced(void) {
   CHECK(unlink(output_path) == 0);
 }
 
+static void test_output_file_is_created_exclusively(void) {
+  char output_path[] = "/tmp/itltocsv-exclusive-test-XXXXXX";
+  FILE *output;
+  int output_fd;
+
+  output_fd = mkstemp(output_path);
+  CHECK(output_fd >= 0);
+  CHECK(close(output_fd) == 0);
+
+  errno = 0;
+  output = open_new_output(output_path);
+  CHECK(output == NULL);
+  CHECK(errno == EEXIST);
+  CHECK(unlink(output_path) == 0);
+}
+
 int main(void) {
   test_csv_fields_are_escaped();
   test_track_row_contains_metadata_and_numbers();
   test_existing_output_is_not_replaced();
+  test_output_file_is_created_exclusively();
   return 0;
 }
