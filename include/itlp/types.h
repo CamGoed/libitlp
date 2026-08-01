@@ -18,6 +18,7 @@ struct msdh {
     BLOCK_MLIH = 0x0B,
     BLOCK_MLTH = 0x01, /**< Master track list */
     BLOCK_MLTH_ALT = 0x0D,
+    BLOCK_XML = 0x13, /**< Auxiliary XML data */
     BLOCK_MLQH = 0x14,
     BLOCK_STSH = 0x17,
     BLOCK_MLPH = 0x02, /**< Playlist list */

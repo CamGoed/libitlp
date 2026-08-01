@@ -54,6 +54,8 @@ void itlp_free_msdh(struct msdh *msdh_block) {
   default:
     break;
   }
+
+  free(msdh_block);
 }
 
 void itlp_free_mfdh(struct mfdh *mfdh_block) {
