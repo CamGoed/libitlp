@@ -51,6 +51,15 @@ ENDIF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 FIND_PACKAGE(ZLIB REQUIRED)
 TARGET_LINK_LIBRARIES(itlp z)
 
+# CSV exporter
+#
+ADD_EXECUTABLE(itlToCsv examples/itltocsv.c)
+TARGET_LINK_LIBRARIES(itlToCsv itlp z)
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  FIND_LIBRARY(SECURITY_FRAMEWORK Security)
+  TARGET_LINK_LIBRARIES(itlToCsv ${SECURITY_FRAMEWORK})
+ENDIF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 # Tests
 #
 INCLUDE(CTest)
@@ -63,6 +72,13 @@ IF (BUILD_TESTING)
     TARGET_LINK_LIBRARIES(parser_tests ${SECURITY_FRAMEWORK})
   ENDIF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   ADD_TEST(NAME parser_tests COMMAND parser_tests)
+
+  ADD_EXECUTABLE(exporter_tests tests/exporter_tests.c)
+  TARGET_LINK_LIBRARIES(exporter_tests itlp z)
+  IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    TARGET_LINK_LIBRARIES(exporter_tests ${SECURITY_FRAMEWORK})
+  ENDIF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  ADD_TEST(NAME exporter_tests COMMAND exporter_tests)
 ENDIF (BUILD_TESTING)
 
 # Installation

@@ -9,11 +9,11 @@
 #include "itlp/types.h"
 
 #define CHECK(condition) do {                                                \
-  if (!(condition)) {                                                       \
-    fprintf(stderr, "CHECK failed at %s:%d: %s\n",                        \
-            __FILE__, __LINE__, #condition);                                \
-    exit(EXIT_FAILURE);                                                     \
-  }                                                                         \
+  if (!(condition)) {                                                        \
+    fprintf(stderr, "CHECK failed at %s:%d: %s\n",                           \
+            __FILE__, __LINE__, #condition);                                 \
+    exit(EXIT_FAILURE);                                                      \
+  }                                                                          \
 } while (0)
 
 static void put_u32(char *buffer, size_t offset, uint32_t value) {
