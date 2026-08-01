@@ -1,3 +1,7 @@
+## About this fork
+
+The original libitlp repository is archived and no longer maintained. This fork fixes bugs found while using it with old iTunes libraries and adds tools for recovering and reviewing their contents. It can export track details to CSV from a given `.itl` file. This was helpful for me to track down my old lost music library. Hopefully the parser fixes and export tools are useful to anyone else trying to recover an old iTunes library.
+
 # libitlp
 
 itlp (aka. **itl Parser/iTunes Library Parser**) is a parser written in C for `.itl` files (iTunes database) produced by *Apple iTunes*. Its goal is to provide more accurate parsing than other third-party software available on internet (such as [titl](https://github.com/josephw/titl) or [meta::cpan's Mac::iTunes::Library::Parse](http://metacpan.org/pod/Mac::iTunes::Library::Parse)), but it is also lower level than those libraries : libitlp provides direct access to the structure of the itl file, not an edulcorated representation which would be easier to work with.
